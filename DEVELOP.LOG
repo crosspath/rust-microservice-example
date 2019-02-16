@@ -1,4 +1,5 @@
 shell:
+  curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly
   cargo new --vcs none --bin rme
   mv -n rme/* .
   # -n: do not overwrite files

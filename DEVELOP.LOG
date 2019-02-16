@@ -1,0 +1,9 @@
+shell:
+  cargo new --vcs none --bin rme
+  mv -n rme/* .
+  # -n: do not overwrite files
+
+psql:
+  create database rust_mserv;
+  create user rust_mserv password 'xxxxxx';
+  grant all on database rust_mserv to rust_mserv;

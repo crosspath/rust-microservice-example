@@ -32,7 +32,8 @@ Create database & user (optional)
 
 Initialise database for this microservice:
 
-    ?* migrate
+    cargo install diesel_cli --no-default-features --features postgres
+    diesel setup
     ?* seeds
 
 Run server:

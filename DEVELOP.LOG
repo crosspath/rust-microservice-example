@@ -3,6 +3,9 @@ shell:
   cargo new --vcs none --bin rme
   mv -n rme/* .
   # -n: do not overwrite files
+  
+  cargo install diesel_cli --no-default-features --features postgres
+  diesel setup
 
 psql:
   create database rust_mserv;

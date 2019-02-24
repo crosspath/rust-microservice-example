@@ -83,13 +83,66 @@ struct ReferralForm {
   user_order_id: i32
 }
 
+struct ReferralFormResult {
+  bonuses:  mut i32,
+  referrer: mut Option<User>,
+  order:    mut Option<UserOrder>
+}
+
+struct FormRunner<T, Y> {
+  inputs:     T,
+  outputs:    mut Y,
+  error_code: mut i8
+}
+
+impl FormRunner<ReferralForm, ReferralFormResult> {
+  fn set_referrer(&self) {
+    if &self.outputs.referrer == None {
+      &self.outputs.referrer = schema::users::table.find(&self.inputs.referrer_id)
+    }
+  }
+
+  fn set_order(&self) {
+    if &self.outputs.order == None {
+      &self.outputs.order = schema::user_orders::table.find(&self.inputs.user_order_id)
+    }
+  }
+
+  fn valid?(&self) -> bool {
+    set_referrer(&self);
+    set_order(&self);
+    
+    let referrer = &self.outputs.referrer;
+    let order = &self.outputs.order;
+    
+    if referrer == None {
+      110
+    } else if order == None {
+      111
+    } else if order.user_id == referrer.id {
+      112
+    } else if 
+  }
+}
+
 #[post("/api/v1/referrals", data = "<form>")]
 fn referrals(
   form: Option<LenientForm<ReferralForm>>,
   api_key: ApiKey
 ) -> content::Json<&'static str> {
   // todo: read post params
+  let response = match form {
+    Some(form_values) => response_success
+    None => println!("form is empty"); response_error(110)
+  }
+  content::Json(response.to_string())
+  
   // todo: search & update data in database
+  let conn = connect_db();
+  let form_runner = FormRunner {
+    inputs:  form_values,
+    outputs: ReferralFormResult {}
+  };
   
   // todo: send json
   let mut json_string: serde_json::Value;
@@ -97,14 +150,7 @@ fn referrals(
     "status": status,
     "bonuses": bonuses
   })
-  json_string = json!({
-    "status": status,
-    "error": CODES.get(status).expect("")
-  })
-  if show_exceptions() {
-    json_string["message"] = message
-    json_string["trace"] = trace
-  }
+
   content::Json(json_string.to_string())
 }
 
@@ -117,8 +163,8 @@ pub fn response_success(options: serde_json::Value) -> serde_json::Value {
 
 pub fn response_error(
   code: i8,
-  exception: ,
-  options: serde_json::Value
+  exception: Option<???> = None,
+  options: serde_json::Value = Null
 ) -> serde_json::Value {
   options = match options {
     Object(Map<String, Value>) => options
